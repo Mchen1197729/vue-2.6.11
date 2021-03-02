@@ -326,27 +326,24 @@ export function stateMixin (Vue: Class<Component>) {
   propsDef.get = function () { return this._props }
   if (process.env.NODE_ENV !== 'production') {
     dataDef.set = function () {
-      warn(
-        'Avoid replacing instance root $data. ' +
-        'Use nested data properties instead.',
-        this
-      )
+      warn('Avoid replacing instance root $data. ' + 'Use nested data properties instead.', this)
     }
     propsDef.set = function () {
       warn(`$props is readonly.`, this)
     }
   }
+  // 为Vue.prototype添加$data属性
   Object.defineProperty(Vue.prototype, '$data', dataDef)
+  // 为Vue.prototype添加$props属性
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  // 向响应式对象中添加一个 property，并确保这个新 property 同样是响应式的，且触发视图更新
   Vue.prototype.$set = set
+  // 删除对象的 property。如果对象是响应式的，确保删除能触发更新视图
   Vue.prototype.$delete = del
 
-  Vue.prototype.$watch = function (
-    expOrFn: string | Function,
-    cb: any,
-    options?: Object
-  ): Function {
+  // 观察Vue实例上的一个表达式或者一个函数计算结果的变化。
+  Vue.prototype.$watch = function (expOrFn: string | Function, cb: any, options?: Object): Function {
     const vm: Component = this
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
