@@ -29,8 +29,8 @@ export function toggleObserving(value: boolean) {
 }
 
 /**
- * Observer class that is attached to each observed
- * object. Once attached, the observer converts the target
+ * Observer class that is attached to each observed object.
+ * Once attached, the observer converts the target
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
  */
@@ -39,12 +39,18 @@ export class Observer {
   dep: Dep;
   vmCount: number; // number of vms that have this object as root $data
 
+  // value是个对象类型的值
   constructor(value: any) {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // 给Observer实例的value属性添加__ob__属性 ==> value.__ob__ = this
+    // this.value指向value 所以this.value也就有了__ob__这个属性 属性值就是这个Observer实例
     def(value, '__ob__', this)
+
     if (Array.isArray(value)) {
+      // value是数组类型
+      // hasProto就是判断浏览器是否支持__proto__属性
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -52,18 +58,19 @@ export class Observer {
       }
       this.observeArray(value)
     } else {
+      // value是对象类型
       this.walk(value)
     }
   }
 
   /**
-   * Walk through all properties and convert them into
-   * getter/setters. This method should only be called when
-   * value type is Object.
+   * Walk through all properties and convert them into getter/setters.
+   * This method should only be called when value type is Object.
    */
   walk(obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
+      // 给对象的每一个属性都添加双向绑定
       defineReactive(obj, keys[i])
     }
   }
@@ -73,6 +80,7 @@ export class Observer {
    */
   observeArray(items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
+      // 给数组的每个下标对应的值都添加监听
       observe(items[i])
     }
   }
@@ -81,8 +89,7 @@ export class Observer {
 // helpers
 
 /**
- * Augment a target Object or Array by intercepting
- * the prototype chain using __proto__
+ * Augment a target Object or Array by intercepting the prototype chain using __proto__
  */
 function protoAugment(target, src: Object) {
   /* eslint-disable no-proto */
